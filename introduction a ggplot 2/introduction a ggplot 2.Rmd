@@ -1,0 +1,185 @@
+---
+title: "Introduction à ggplot 2"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+## Configuration
+
+Merci d'installer les packages suivants pour suivre ce tutoriel
+
+```{r, eval = F}
+install.packages("ggplot2")
+install.packages("palmerpenguins")
+install.packages("dplyr")
+install.packages("tibble")
+```
+
+```{r, echo}
+library(ggplot2)
+library(palmerpenguins)
+library(tibble)
+```
+
+## Présentation de ggplot2
+
+- [ggplot2](http://ggplot2.tidyverse.org/) est un package créé par Hadley Wickham et Winston Chang pour implémenter dans R la vision développée par Leland Wilkinson dans  [The Grammar of Graphics (Statistics and Computing)](https://www.amazon.com/Grammar-Graphics-Statistics-Computing/dp/0387245448/ref=as_li_ss_tl?ie=UTF8&qid=1477928463&sr=8-1&keywords=the+grammar+of+graphics&linkCode=sl1&tag=ggplot2-20&linkId=f0130e557161b83fbe97ba0e9175c431) de la conception de graphiques.
+
+- Le but est de fournir une approche unique pour produire quasiment **toute valorisation graphique** de données que l'on peut trouver dans des revues scientifiques, les journaux, dans l'analyse statistique ou la data visualisation.
+
+- Ce package s'inscrit aujourd'hui dans R par le **framework tidyverse** qui propose une approche cohérente entre l'importation et la préparation des données, leur analyse et leur valorisation.
+
+
+![le tidyverse](images/tidyverse.png "le tidyverse"){#id .class width=800}
+
+## Présentation des datasets
+
+### Palmer Penguins
+
+Le dataset palmerpenguins contiennt des mesures de tailles pour 3 espèces de pingouin observées sur 3 îles de l'[archipel Palmer en Antarxtique](https://fr.wikipedia.org/wiki/Archipel_Palmer)
+
+![](images/lter_penguins.png "Les 3 espèces de penguins"){width=800}
+
+Les pingouins de l'archipel de Palmer. Artwork by [@allison_horst](https://www.github.com/allisonhorst).
+
+Ces données ont été collectées entre 2007 et 2009 par Docteur Dr. Kristen Gorman avec le [programme de recherche écologique à long terme de la station Palmer](https://pal.lternet.edu/), une partie du [réseau de recherche écologique à long terme des Etats Unis](https://lternet.edu/). les données sont diffusées sous la licence CC0 license (“No Rights Reserved”) en accord avec la [politique data de la station Palmer](https://pal.lternet.edu/data/policies).
+
+Le dataset palmerpenguins::penguins dataset contient 8 variables sur 344 pingouins (dont 333 observations complètes). Pour obtenir plus d'info sur les variables, vous pouvez taper `?penguins`.
+
+```{r}
+glimpse(penguins)
+```
+
+## Les concepts clefs
+
+Pour construire un graphique avec ggplot2, il faut définir plusieurs éléments : 
+
+- **la donnée** : ggplot2 permet de travailler sur des vecteurs, des dataframes, des tibbles, ou des données spatiales ;
+
+- le **mapping** : on définit dans l'aesthetic (ou aes) le **mapping**, c'est à dire ce que l'on veut représenter qui **dépend des variables** (quelle variable sur l'axe x, sur l'axe y, quelle variable pour définir une graduation de couleurs...) ;
+
+- les **paramètres** : on définit les autres paramètres qui dépendent de constantes (par exemple : je veux que toutes mes lignes soient rouge ou de taille 2 pixels) ;
+
+- le **layer ("forme géométrique")** : on définit sous quelle représentation graphique on représente les paramètres précédents. Sous `ggplot`, ces fonctions sont de la forme `geom_XX` ;
+
+L'écriture type d'un graphique est donc: 
+
+```{r, echo=T,eval=F}
+ggplot(data = <DATA>) + 
+  <FORME_GEO>(mapping = aes(<MAPPINGS>),...=<PARAMS>)
+```
+
+On va ensuite pouvoir enrichir avec des fonctions supplémentaires.
+Chaque fonction s'enchaine avec des `+` comme les pipe.
+
+```{r, echo=T,eval=F}
+ggplot(data = <DATA>) + 
+  <FORME_GEO>(mapping = aes(<MAPPINGS>),...=<PARAMS>)+
+  <FONCTION1>+
+  ...
+```
+
+
+## Le mapping
+
+### Les paramètres du mapping
+
+Dans l'exemple qui suit, la représentation géographique utilisée est le nuage de points **geom_point**.
+D'autres types de représentations géographiques sont présentés dans la partie suivante.
+
+L'aesthetic sert à identifier les variables que l'on souhaite représenter.
+Par exemple, si l'on souhaite représenter la longueur de la nageoire en fonction du poids des pingouins :
+
+```{r, fig.height=3.5}
+ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point()
+```
+
+De plus, la fonction **aes** admet d'autres arguments qui permettent de modifier l'apparence du graphique selon une 3ème variable du jeu de données. Par exemple : 
+
+- **colour** : la couleur,
+- **shape** : la forme,
+- **size** : la taille,
+- **alpha** : la transparence,
+- **fill** : le remplissage ;
+
+```{r, fig.height=3.5}
+ggplot(data = penguins) +
+  geom_point(aes(x = flipper_length_mm, 
+                            y = body_mass_g,
+                            color = species,
+                            shape = species)
+             )
+```
+
+### Les "autres" paramètres
+
+Il est possible de spécifier des paramètres qui seront valables pour l'ensemble du graphique. 
+On retrouve entre autre les mêmes paramètres proposés dans l'aes, mais il faut alors les passer **en dehors de l'aesthetic**.
+
+Par exemple, si l'on souhaite modifier la transparence et la taille de l'ensemble des points du graphique précédent:
+
+```{r, fig.height=3.5}
+ggplot(data = penguins) +
+  geom_point(aes(x = flipper_length_mm, 
+                            y = body_mass_g,
+                            color = species,
+                            shape = species),
+             size = 2,
+             alpha = 0.7)
+```
+
+Pour choisir et modifier facilement les couleurs d'un graphique, il existe un addin développé par Dean Attali: **Colour Picker**
+Il est installable comme n'importe quel package.
+Pour plus d'informations: https://github.com/daattali/colourpicker
+
+## A vous de jouer !
+
+Prenez le dataset `penguins` et réaliser un nuage de point des pinguouins avec : 
+
+- en abscisse la longueur du bec `bill_length_mm`
+- en ordonnée l'épaisseur du bec  `bill_depth_mm`
+- une forme des points en fonction de l'espèce `species`
+- une couleur en fonction du sexe `sex`
+
+```{r firstggplot, exercise=TRUE, exercise.lines = 10}
+
+```
+
+```{r firstggplot-solution}
+ggplot(data = penguins) +
+  geom_point(aes(x = bill_length_mm, 
+                            y = bill_depth_mm,
+                            color = sex,
+                            shape = species),
+             size = 2,
+             alpha = 0.7)
+```
+
+
+## Les différents layers possibles
+
+Vous avez deux moyens pour explorer les différentes formes de valorisations (layers) possibles avec R.
+
+:::: {style="display: flex;"}
+::: {}
+Le site de [ggplot2](https://ggplot2.tidyverse.org/reference/index.html#section-layers) vous donne accès à l'ensemble des ***layers*** possibles et vous donne plusieurs exemples d'utilisation, vous donne aussi les paramètres possibles dans l'aes de chacun.
+:::
+::: {}
+![](images/ggplot2website.png){width=400}
+:::
+::::
+
+:::: {style="display: flex;"}
+::: {}
+![](images/datatoviz.png){width=400}
+:::
+::: {}
+Le site [from data to viz](https://www.data-to-viz.com/) vous permet d'avoir une entrée en fonction des ***type de données*** que vous souhaitez valoriser
+:::
+::::
