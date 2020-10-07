@@ -7,12 +7,15 @@ runtime: shiny_prerendered
 ```{r setup, include=FALSE}
 library(learnr)
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(knitr)
+library(kableExtra)
 library(ggplot2)
 library(palmerpenguins)
 library(tibble)
 library(DT)
 library(dplyr)
 library(lubridate)
+library(sf)
 library(flair)
 stringency_index <- read.csv("https://raw.githubusercontent.com/MaelTheuliere/ggplot_shs/master/introduction%20a%20ggplot%202/data/stringency_index.csv") %>% 
   mutate(Date = ymd(Date))
@@ -23,21 +26,27 @@ stringency_index <- read.csv("https://raw.githubusercontent.com/MaelTheuliere/gg
 Merci d'installer les packages suivants pour suivre ce tutoriel
 
 ```{r, echo = T,eval = F}
+install.packages("knitr")
+install.packages("kableExtra")
 install.packages("ggplot2")
 install.packages("palmerpenguins")
 install.packages("dplyr")
 install.packages("tibble")
 install.packages("DT")
 install.packages('lubridate')
+install.packages("sf")
 ```
 
 ```{r, echo = T, eval = F}
+library(knitr)
+library(kableExtra)
 library(ggplot2)
 library(palmerpenguins)
 library(tibble)
 library(dplyr)
 library(DT)
 library(lubridate)
+library(sf)
 ```
 
 ## Présentation de ggplot2
@@ -522,7 +531,7 @@ stringency_index %>%
 
 Les graphiques à facette ou "small multiple" permettent de mettre en lumière la façon dont un phénomène va différer suivant les valeurs d'une variable catégorielle.
 
-La fonction `facet_wrap` de `{ggplot2}` permet de réaliser des facettes en R.
+La fonction `facet_wrap()` de `{ggplot2}` permet de réaliser des facettes en R.
 
 Prenons l'exemple précédent, nous allons pouvoir réaliser un graphique à facettes sur l'ensemble des pays de notre jeux de donnée de cette façon
 
@@ -538,5 +547,86 @@ stringency_index %>%
 ```{r facet-flair, echo = FALSE}
 decorate("facet") %>% 
   flair("facet_wrap(~CountryName) +")
+```
+
+## Les cartes
+
+`{ggplot2}` permet également de faire des cartes, qui devient un layer comme un autre.
+
+La première chose dont on a besoin pour faire des cartes est un fond de carte ou composante spatiale à rajouter à nos données. Ici en l'ocurence nous avons besoin des polygones traçant le contour de nos pays. Pour gérer la composante spatiale vectorielle d'une donnée, le package de référence dans R est aujourd'hui `{sf}`. Nous avons préparé ici un fond de carte spécifique à nos données covid sur les pays de l'union européenne.
+
+```{r}
+load('data/ue.RData')
+```
+
+```{r}
+kable(ue) %>% 
+  kable_material()
+```
+
+On peut remarquer que ce dataset est un peu spécial
+
+- il est de classe `sf` et pas seulement `data.frame`
+- il possède une colonne `geometry` d'un nouveau type  `sfc_POLYGON`
+- il possède des métadonnées propres aux données spatiales : crs, bbox, dimension, type de géométrie
+
+```{r}
+class(ue)
+head(ue[,c("name","pop_est","geometry")])
+```
+
+Et l'utilisation de la fonction  `plot()` permet de visualiser nos données
+
+```{r}
+plot(ue)
+```
+
+Si on veut utiliser `{ggplot2}` on va utiliser une fonction spécifique `geom_sf()`
+
+```{r}
+ggplot(data = ue) +
+  geom_sf()
+```
+
+Pour visualiser nos données covid,il va falloir apparier nos données spatiales avec nos données brutes afin de les visualiser sur une carte :
+
+```{r}
+stringency_index_wgs84<- ue %>% 
+  inner_join(stringency_index,by=c("iso_a3"="CountryCode"))
+```
+
+Ici nous sommes sur des données en volume (nombre de morts), on va devoir réaliser des ronds proportionnels.
+
+On va coupler à notre fond de carte obtenu avec `geom_sf()` la fonction `stat_sf_coordinates()` qui permet de réaliser un centroid : 
+
+```{r map_ggplot,fig.width = 8,fig.height =8}
+stringency_index_wgs84 %>% 
+  filter(Date=="2020-03-31") %>% 
+  ggplot() +
+  geom_sf() +
+  stat_sf_coordinates(aes(size = ConfirmedDeaths),shape=21) +
+  theme_void() +
+  labs(title = "Nombre de morts du covid au 31 mars")
+```
+
+Pour en faire une carte difusable, il faut ensuite un peu de style : 
+
+```{r map_ggplot_theme, include = FALSE,fig.width = 8,fig.height =8}
+stringency_index_wgs84 %>% 
+  filter(Date=="2020-03-31") %>% 
+  ggplot() +
+  geom_sf(fill='#e5e5e5',color='white') +
+  stat_sf_coordinates(aes(size = ConfirmedDeaths),shape=21,color='white',fill='red',alpha = .2) +
+  scale_size(range = c(1,30)) +
+  theme_void() +
+  theme(legend.position = 'top')+
+  labs(title = "Nombre de morts du covid au 31 mars",size = NULL)
+```
+
+```{r map_ggplot_theme-flair, echo = FALSE,fig.width = 8,fig.height =8}
+decorate("map_ggplot_theme") %>% 
+  flair("fill='#e5e5e5',color='white'") %>% 
+  flair(",color='dark red',fill='red',alpha = .2") %>% 
+  flair("  scale_size(range = c(1,30))+")
 ```
 
