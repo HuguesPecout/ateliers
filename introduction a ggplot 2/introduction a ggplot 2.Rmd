@@ -7,27 +7,23 @@ runtime: shiny_prerendered
 ```{r setup, include=FALSE}
 library(learnr)
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
-library(ggplot2)
-library(palmerpenguins)
-library(tibble)
 ```
 
 ## Configuration
 
 Merci d'installer les packages suivants pour suivre ce tutoriel
 
-```{r, echo = T,eval = F}
+```{r, eval = F}
 install.packages("ggplot2")
 install.packages("palmerpenguins")
 install.packages("dplyr")
 install.packages("tibble")
 ```
 
-```{r, echo = T, eval = F}
+```{r, echo}
 library(ggplot2)
 library(palmerpenguins)
 library(tibble)
-library(dplyr)
 ```
 
 ## Présentation de ggplot2
@@ -45,7 +41,7 @@ library(dplyr)
 
 ### Palmer Penguins
 
-Le dataset palmerpenguins contiennt des mesures de tailles pour 3 espèces de pingouin observées sur 3 îles de l'[archipel Palmer en Antarxtique](https://fr.wikipedia.org/wiki/Archipel_Palmer)
+Le dataset palmerpenguins contient des mesures de tailles pour 3 espèces de pingouin observées sur 3 îles de l'[archipel Palmer en Antarxtique](https://fr.wikipedia.org/wiki/Archipel_Palmer)
 
 ![](images/lter_penguins.png "Les 3 espèces de penguins"){width=800}
 
@@ -58,6 +54,61 @@ Le dataset palmerpenguins::penguins dataset contient 8 variables sur 344 pingoui
 ```{r}
 glimpse(penguins)
 ```
+
+
+### Oxford COVID-19 Government Response Tracker (OxCGRT)
+
+L'[OxCGRT](https://www.bsg.ox.ac.uk/research/research-projects/coronavirus-government-response-tracker) est un projet de la [Blavatnik School of Government](https://www.bsg.ox.ac.uk/) (Université d'Oxford). Il implique une centaine de membres qui mettent à jour en continu une base de données de [17 indicateurs](https://github.com/OxCGRT/covid-policy-tracker/blob/master/documentation/codebook.md) sur les réponses gouvernementales pour faire face à la pandémie de la COVID-19.
+
+Ces indicateurs reflètent les politiques d'endiguement telles que les fermetures d'écoles, des lieux de travail, des transports publics, les politiques de confinement ou encore l'annulation d'événements publics. Un indice de rigueur ([*Stringency Index*](https://github.com/OxCGRT/covid-policy-tracker/blob/master/documentation/index_methodology.md)) s'étalant de 0 à 100 est ensuite calculé à partir de ces 17 indicateurs. Il reflète, selon ses créateurs, le niveau de rigueur des gouvernements (et son évolution) pour faire face à la pandémie.
+
+<iframe src="https://ourworldindata.org/grapher/covid-stringency-index?time=2020-05-07..2020-09-29" loading="lazy" style="width: 100%; height: 600px; border: 0px none;"></iframe>
+
+<br>
+
+Chaque indicateur est calculé quotidiennement depuis le 1er janvier 2020, pour l'ensemble des pays du Monde. La base de données complète est disponible [ici](https://raw.githubusercontent.com/OxCGRT/covid-policy-tracker/master/data/OxCGRT_latest.csv).
+
+
+
+Pour cet atelier, nous travaillerons sur une extraction de ce jeu de données :    
+- La période de temps a été réduite du 1er février au 30 juin 2020    
+- L'extraction ne comporte que les données sur les pays de l'Union Européenne à 28 (GBR inclus)     
+- Certaines variables ont été supprimées pour simplifier le tableau   
+
+Vous pouvez télécharger l'extraction via ce [lien](https://raw.githubusercontent.com/MaelTheuliere/ggplot_shs/master/introduction a ggplot 2/data/stringency_index.csv), et/ou directement la charger dans R en utilisant son URL d'accès :
+
+
+```{r eval=FALSE}
+
+stringency_index <- read.csv("https://raw.githubusercontent.com/MaelTheuliere/ggplot_shs/master/introduction a ggplot 2/data/stringency_index.csv")
+
+```
+
+```{r eval=TRUE, include=FALSE}
+
+# En attendant la pull request... :
+stringency_index <- read.csv("https://raw.githubusercontent.com/HuguesPecout/ggplot_shs/master/introduction%20a%20ggplot%202/data/stringency_index.csv")
+
+```
+
+<br>
+
+Le tableau de données se présente de la façon suivante :
+
+```{r eval=TRUE, include=TRUE, echo=FALSE}
+# Structure du tableau de données :
+library(DT)
+datatable(stringency_index, rownames = FALSE, options = list(pageLength = 5, autoWidth = TRUE, scrollX = TRUE))
+
+```
+
+<br>
+
+L'utilisation de ces données est soumise à la licence [Creative Commons Attribution CC-BY](https://creativecommons.org/licenses/by/4.0/deed.fr).  
+
+Citation recommandée: *Hale, Thomas, Noam Angrist, Emily Cameron-Blake, Laura Hallas, Beatriz Kira, Saptarshi Majumdar, Anna Petherick, Toby Phillips, Helen Tatlow, Samuel Webster (2020). Oxford COVID-19 Government Response Tracker, Blavatnik School of Government.* 
+
+
 
 ## Les concepts clefs
 
@@ -138,51 +189,9 @@ ggplot(data = penguins) +
              alpha = 0.7)
 ```
 
-## Enrichir votre graphique
-
-### Rajouter un titre ou des libellés
-
-Nous utilisons la fonction `labs()` qui permet de labelliser tous les éléments possibles de l’aesthétic, ainsi que le titre (***title***), le sous titre (***subtitle***) et le bas de page (***caption***). Nous pouvons via l'instruction `labs()` modifier aussi les libellés des axes et le titre de la légende en nommant les variables présentes dans *l'aesthetic*
-
-```{r}
-ggplot(data = penguins) +
-  geom_point(aes(x = flipper_length_mm, 
-                            y = body_mass_g,
-                            color = species,
-                            shape = species),
-             size = 2,
-             alpha = 0.7) +
- labs(title = "Penguin size, Palmer Station LTER",
-       subtitle = "Flipper length and body mass for Adelie, Chinstrap and Gentoo Penguins",
-      caption = "Gorman KB, Williams TD, Fraser WR (2014)",
-       x = "Flipper length (mm)",
-       y = "Body mass (g)",
-       color = "Penguin species",
-       shape = "Penguin species")
-```
-
-### Modifier le thème
-
-Plusieurs thèmes par défaut existent dans ggplot 2 vous permettant d'ajuster l'apparence de votre graphique. La liste des themes disponibles se trouve sur le [site du package](https://ggplot2.tidyverse.org/reference/ggtheme.html)
-
-```{r}
-ggplot(data = penguins) +
-  geom_point(aes(x = flipper_length_mm, 
-                            y = body_mass_g,
-                            color = species,
-                            shape = species),
-             size = 2,
-             alpha = 0.7) +
-  theme_minimal()+
- labs(title = "Penguin size, Palmer Station LTER",
-       subtitle = "Flipper length and body mass for Adelie, Chinstrap and Gentoo Penguins",
-      caption = "Gorman KB, Williams TD, Fraser WR (2014)",
-       x = "Flipper length (mm)",
-       y = "Body mass (g)",
-       color = "Penguin species",
-       shape = "Penguin species")
-```
-
+Pour choisir et modifier facilement les couleurs d'un graphique, il existe un addin développé par Dean Attali: **Colour Picker**
+Il est installable comme n'importe quel package.
+Pour plus d'informations: https://github.com/daattali/colourpicker
 
 ## A vous de jouer !
 
@@ -192,9 +201,6 @@ Prenez le dataset `penguins` et réaliser un nuage de point des pinguouins avec 
 - en ordonnée l'épaisseur du bec  `bill_depth_mm`
 - une forme des points en fonction de l'espèce `species`
 - une couleur en fonction du sexe `sex`
-- une taille des points à 2.2
-- une transparence à 0.5
-- rajouter un thème, un titre, un sous titre et des libellés
 
 ```{r firstggplot, exercise=TRUE, exercise.lines = 10}
 
@@ -206,16 +212,8 @@ ggplot(data = penguins) +
                             y = bill_depth_mm,
                             color = sex,
                             shape = species),
-             size = 2.2,
-             alpha = 0.5)+
-    theme_minimal() +
-  labs(title = "Penguin bill dimensions",
-       subtitle = "Bill length and depth for Adelie, Chinstrap and Gentoo Penguins at Palmer Station LTER",
-      caption = "Gorman KB, Williams TD, Fraser WR (2014)",
-       x = "Bill length (mm)",
-       y = "Bill depth (mm)",
-       color = "Penguin species",
-       shape = "Penguin species") 
+             size = 2,
+             alpha = 0.7)
 ```
 
 
@@ -240,116 +238,3 @@ Le site de [ggplot2](https://ggplot2.tidyverse.org/reference/index.html#section-
 Le site [from data to viz](https://www.data-to-viz.com/) vous permet d'avoir une entrée en fonction des ***type de données*** que vous souhaitez valoriser
 :::
 ::::
-
-## A vous de jouer !
-
-A partir des sites précédents, refaire les graphiques suivants.
-
-### Diagramme barre
-
-```{r, echo = F}
-ggplot(penguins) +
-  geom_bar(aes(x = island, fill = species), alpha = 0.8) + 
-  theme_minimal()
-  labs(x = "Island",
-       y = "Frequency",
-       title = "Penguin location")
-```
-
-
-```{r geom_bar, exercise=TRUE, exercise.lines = 10}
-
-```
-
-```{r geom_bar-solution}
-ggplot(penguins) +
-  geom_bar(aes(x = island, fill = species), alpha = 0.8) + 
-  theme_minimal()
-  labs(x = "Island",
-       y = "Frequency",
-       title = "Penguin location")
-```
-### Histogramme
-
-```{r, echo = F}
-ggplot(data = penguins) +
-  geom_histogram(aes(x = flipper_length_mm,
-                     fill = species),
-                 alpha = 0.5,
-                 position = "identity")+
-  labs(x = "Flipper length (mm)",
-       y = "Frequency",
-       title = "Penguin flipper lengths")+
-  theme_minimal()
-```
-
-
-```{r geom_histogram, exercise=TRUE, exercise.lines = 10}
-
-```
-```{r geom_histogram-solution}
-ggplot(data = penguins) +
-  geom_histogram(aes(x = flipper_length_mm,
-                     fill = species),
-                 alpha = 0.5,
-                 position = "identity")+
-  
-  labs(x = "Flipper length (mm)",
-       y = "Frequency",
-       title = "Penguin flipper lengths")+
-  theme_minimal()
-```
-
-### box plot
-
-```{r, echo = F}
-ggplot(data = penguins) +
-  geom_boxplot(aes(x = species, y = flipper_length_mm,color = species), width = 0.3, show.legend = FALSE) +
-  theme_minimal() +
-  labs(x = "Species",
-       y = "Flipper length (mm)") +
-  theme_minimal() +
-  labs(x = "Body mass (g)",
-       y = "Frequency",
-       title = "Penguin body mass")
-```
-
-```{r geom_boxplot, exercise=TRUE, exercise.lines = 10}
-
-```
-
-```{r geom_boxplot-solution}
-ggplot(data = penguins) +
-  geom_boxplot(aes(x = species, y = flipper_length_mm,color = species), width = 0.3, show.legend = FALSE) +
-  theme_minimal() +
-  labs(x = "Species",
-       y = "Flipper length (mm)") +
-  theme_minimal() +
-  labs(x = "Body mass (g)",
-       y = "Frequency",
-       title = "Penguin body mass")
-```
-
-### jitter plot
-
-```{r, echo = F}
-ggplot(data = penguins) +
-  geom_jitter(aes(x = species, y = body_mass_g, color = species), alpha = 0.5, show.legend = FALSE, position = position_jitter(width = 0.2, seed = 0)) +
-  theme_dark() +
-  labs(x = "Body mass (g)",
-       y = "Frequency",
-       title = "Penguin body mass")
-```
-
-```{r geom_jitter, exercise=TRUE, exercise.lines = 10}
-
-```
-
-```{r geom_jitter-solution}
-ggplot(data = penguins) +
-  geom_jitter(aes(x = species, y = body_mass_g, color = species), alpha = 0.5, show.legend = FALSE, position = position_jitter(width = 0.2, seed = 0)) +
-  theme_dark() +
-  labs(x = "Body mass (g)",
-       y = "Frequency",
-       title = "Penguin body mass")
-```
