@@ -7,23 +7,37 @@ runtime: shiny_prerendered
 ```{r setup, include=FALSE}
 library(learnr)
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(ggplot2)
+library(palmerpenguins)
+library(tibble)
+library(DT)
+library(dplyr)
+library(lubridate)
+library(flair)
+stringency_index <- read.csv("https://raw.githubusercontent.com/MaelTheuliere/ggplot_shs/master/introduction%20a%20ggplot%202/data/stringency_index.csv") %>% 
+  mutate(Date = ymd(Date))
 ```
 
 ## Configuration
 
 Merci d'installer les packages suivants pour suivre ce tutoriel
 
-```{r, eval = F}
+```{r, echo = T,eval = F}
 install.packages("ggplot2")
 install.packages("palmerpenguins")
 install.packages("dplyr")
 install.packages("tibble")
+install.packages("DT")
+install.packages('lubridate')
 ```
 
-```{r, echo}
+```{r, echo = T, eval = F}
 library(ggplot2)
 library(palmerpenguins)
 library(tibble)
+library(dplyr)
+library(DT)
+library(lubridate)
 ```
 
 ## Présentation de ggplot2
@@ -47,14 +61,28 @@ Le dataset palmerpenguins contient des mesures de tailles pour 3 espèces de pin
 
 Les pingouins de l'archipel de Palmer. Artwork by [@allison_horst](https://www.github.com/allisonhorst).
 
-Ces données ont été collectées entre 2007 et 2009 par Docteur Dr. Kristen Gorman avec le [programme de recherche écologique à long terme de la station Palmer](https://pal.lternet.edu/), une partie du [réseau de recherche écologique à long terme des Etats Unis](https://lternet.edu/). les données sont diffusées sous la licence CC0 license (“No Rights Reserved”) en accord avec la [politique data de la station Palmer](https://pal.lternet.edu/data/policies).
+Ces données ont été collectées entre 2007 et 2009 par Docteur Dr. Kristen Gorman avec le [programme de recherche écologique à long terme de la station Palmer](https://pal.lternet.edu/), une partie du [réseau de recherche écologique à long terme des Etats Unis](https://lternet.edu/). 
 
-Le dataset palmerpenguins::penguins dataset contient 8 variables sur 344 pingouins (dont 333 observations complètes). Pour obtenir plus d'info sur les variables, vous pouvez taper `?penguins`.
+ELles ont été mises dans un package R [palmerpenguins](https://allisonhorst.github.io/palmerpenguins/) par Allison Horst et Alison Hill.
+Le dataset `palmerpenguins::penguins` contient 8 variables sur 344 pingouins (dont 333 observations complètes). Pour obtenir plus d'info sur les variables, vous pouvez taper `?penguins`.
 
 ```{r}
 glimpse(penguins)
 ```
 
+Le tableau de données se présente de la façon suivante :
+
+```{r eval=TRUE, include=TRUE, echo=FALSE}
+# Structure du tableau de données :
+datatable(penguins[1:10,], rownames = FALSE, options = list(pageLength = 5, autoWidth = TRUE, scrollX = TRUE))
+
+```
+
+Les données sont diffusées sous la licence CC0 license (“No Rights Reserved”) en accord avec la [politique data de la station Palmer](https://pal.lternet.edu/data/policies).
+
+Citation recommandée pour le dataset : *Gorman KB, Williams TD, Fraser WR (2014) Ecological Sexual Dimorphism and Environmental Variability within a Community of Antarctic Penguins (Genus Pygoscelis). PLoS ONE 9(3): e90081. https://doi.org/10.1371/journal.pone.0090081*
+
+Citation recommandée pour le package : *Horst AM, Hill AP, Gorman KB (2020). palmerpenguins: Palmer Archipelago (Antarctica) penguin data. R package version 0.1.0. https://allisonhorst.github.io/palmerpenguins/. doi: 10.5281/zenodo.3960218.*
 
 ### Oxford COVID-19 Government Response Tracker (OxCGRT)
 
@@ -79,16 +107,14 @@ Vous pouvez télécharger l'extraction via ce [lien](https://raw.githubuserconte
 
 
 ```{r eval=FALSE}
-
-stringency_index <- read.csv("https://raw.githubusercontent.com/MaelTheuliere/ggplot_shs/master/introduction a ggplot 2/data/stringency_index.csv")
-
+stringency_index <- read.csv("https://raw.githubusercontent.com/MaelTheuliere/ggplot_shs/master/introduction%20a%20ggplot%202/data/stringency_index.csv")
 ```
 
-```{r eval=TRUE, include=FALSE}
+Par défaut ici notre variable date n'est pas au bon format, on doit la convertir avec les fonctions du package [`{lubridate}`](https://lubridate.tidyverse.org/) : 
 
-# En attendant la pull request... :
-stringency_index <- read.csv("https://raw.githubusercontent.com/HuguesPecout/ggplot_shs/master/introduction%20a%20ggplot%202/data/stringency_index.csv")
-
+```{r}
+stringency_index <- stringency_index %>% 
+  mutate(Date = ymd(Date))
 ```
 
 <br>
@@ -97,9 +123,7 @@ Le tableau de données se présente de la façon suivante :
 
 ```{r eval=TRUE, include=TRUE, echo=FALSE}
 # Structure du tableau de données :
-library(DT)
-datatable(stringency_index, rownames = FALSE, options = list(pageLength = 5, autoWidth = TRUE, scrollX = TRUE))
-
+datatable(stringency_index[1:10,], rownames = FALSE, options = list(pageLength = 5, autoWidth = TRUE, scrollX = TRUE))
 ```
 
 <br>
@@ -107,7 +131,6 @@ datatable(stringency_index, rownames = FALSE, options = list(pageLength = 5, aut
 L'utilisation de ces données est soumise à la licence [Creative Commons Attribution CC-BY](https://creativecommons.org/licenses/by/4.0/deed.fr).  
 
 Citation recommandée: *Hale, Thomas, Noam Angrist, Emily Cameron-Blake, Laura Hallas, Beatriz Kira, Saptarshi Majumdar, Anna Petherick, Toby Phillips, Helen Tatlow, Samuel Webster (2020). Oxford COVID-19 Government Response Tracker, Blavatnik School of Government.* 
-
 
 
 ## Les concepts clefs
@@ -177,14 +200,14 @@ ggplot(data = penguins) +
 Il est possible de spécifier des paramètres qui seront valables pour l'ensemble du graphique. 
 On retrouve entre autre les mêmes paramètres proposés dans l'aes, mais il faut alors les passer **en dehors de l'aesthetic**.
 
-Par exemple, si l'on souhaite modifier la transparence et la taille de l'ensemble des points du graphique précédent:
+Par exemple, si l'on souhaite modifier la transparence et la taille de l'ensemble des points du graphique précédent, et que notre couleur soit une constante :
 
 ```{r, fig.height=3.5}
 ggplot(data = penguins) +
   geom_point(aes(x = flipper_length_mm, 
                             y = body_mass_g,
-                            color = species,
                             shape = species),
+                            color = "deepskyblue2",
              size = 2,
              alpha = 0.7)
 ```
@@ -193,6 +216,53 @@ Pour choisir et modifier facilement les couleurs d'un graphique, il existe un ad
 Il est installable comme n'importe quel package.
 Pour plus d'informations: https://github.com/daattali/colourpicker
 
+
+## Enrichir votre graphique
+
+### Rajouter un titre ou des libellés
+
+Nous utilisons la fonction `labs()` qui permet de labelliser tous les éléments possibles de l’aesthétic, ainsi que le titre (***title***), le sous titre (***subtitle***) et le bas de page (***caption***). Nous pouvons via l'instruction `labs()` modifier aussi les libellés des axes et le titre de la légende en nommant les variables présentes dans *l'aesthetic*
+
+```{r}
+ggplot(data = penguins) +
+  geom_point(aes(x = flipper_length_mm, 
+                            y = body_mass_g,
+                            color = species,
+                            shape = species),
+             size = 2,
+             alpha = 0.7) +
+ labs(title = "Penguin size, Palmer Station LTER",
+       subtitle = "Flipper length and body mass for Adelie, Chinstrap and Gentoo Penguins",
+      caption = "Gorman KB, Williams TD, Fraser WR (2014)",
+       x = "Flipper length (mm)",
+       y = "Body mass (g)",
+       color = "Penguin species",
+       shape = "Penguin species")
+```
+
+### Modifier le thème
+
+Plusieurs thèmes par défaut existent dans ggplot 2 vous permettant d'ajuster l'apparence de votre graphique. La liste des themes disponibles se trouve sur le [site du package](https://ggplot2.tidyverse.org/reference/ggtheme.html)
+
+```{r}
+ggplot(data = penguins) +
+  geom_point(aes(x = flipper_length_mm, 
+                            y = body_mass_g,
+                            color = species,
+                            shape = species),
+             size = 2,
+             alpha = 0.7) +
+  theme_minimal()+
+ labs(title = "Penguin size, Palmer Station LTER",
+       subtitle = "Flipper length and body mass for Adelie, Chinstrap and Gentoo Penguins",
+      caption = "Gorman KB, Williams TD, Fraser WR (2014)",
+       x = "Flipper length (mm)",
+       y = "Body mass (g)",
+       color = "Penguin species",
+       shape = "Penguin species")
+```
+
+
 ## A vous de jouer !
 
 Prenez le dataset `penguins` et réaliser un nuage de point des pinguouins avec : 
@@ -200,7 +270,7 @@ Prenez le dataset `penguins` et réaliser un nuage de point des pinguouins avec 
 - en abscisse la longueur du bec `bill_length_mm`
 - en ordonnée l'épaisseur du bec  `bill_depth_mm`
 - une forme des points en fonction de l'espèce `species`
-- une couleur en fonction du sexe `sex`
+
 
 ```{r firstggplot, exercise=TRUE, exercise.lines = 10}
 
@@ -210,12 +280,38 @@ Prenez le dataset `penguins` et réaliser un nuage de point des pinguouins avec 
 ggplot(data = penguins) +
   geom_point(aes(x = bill_length_mm, 
                             y = bill_depth_mm,
-                            color = sex,
-                            shape = species),
-             size = 2,
-             alpha = 0.7)
+                            shape = species)
+             )
 ```
 
+Prenez le graphique précédent, et rajouter : 
+
+- une couleur en fonction du sexe `sex`
+- une taille des points à 2.2
+- une transparence à 0.5
+- un thème, un titre, un sous titre et des libellés
+
+```{r secondggplot, exercise=TRUE, exercise.lines = 10}
+
+```
+
+```{r secondggplot-solution}
+ggplot(data = penguins) +
+  geom_point(aes(x = bill_length_mm, 
+                            y = bill_depth_mm,
+                            color = sex,
+                            shape = species),
+             size = 2.2,
+             alpha = 0.5)+
+    theme_minimal() +
+  labs(title = "Penguin bill dimensions",
+       subtitle = "Bill length and depth for Adelie, Chinstrap and Gentoo Penguins at Palmer Station LTER",
+      caption = "Gorman KB, Williams TD, Fraser WR (2014)",
+       x = "Bill length (mm)",
+       y = "Bill depth (mm)",
+       color = "Penguin species",
+       shape = "Penguin species") 
+```
 
 ## Les différents layers possibles
 
@@ -238,3 +334,209 @@ Le site de [ggplot2](https://ggplot2.tidyverse.org/reference/index.html#section-
 Le site [from data to viz](https://www.data-to-viz.com/) vous permet d'avoir une entrée en fonction des ***type de données*** que vous souhaitez valoriser
 :::
 ::::
+
+## A vous de jouer !
+
+A partir des sites précédents, refaire les graphiques suivants.
+
+### Diagramme barre
+
+https://www.r-graph-gallery.com/barplot
+
+```{r, echo = F}
+ggplot(penguins) +
+  geom_bar(aes(x = island, fill = species), alpha = 0.8) + 
+  theme_minimal()
+  labs(x = "Island",
+       y = "Frequency",
+       title = "Penguin location")
+```
+
+
+```{r geom_bar, exercise=TRUE, exercise.lines = 10}
+
+```
+
+```{r geom_bar-solution}
+ggplot(penguins) +
+  geom_bar(aes(x = island, fill = species), alpha = 0.8) + 
+  theme_minimal()
+  labs(x = "Island",
+       y = "Frequency",
+       title = "Penguin location")
+```
+
+### Histogramme
+
+https://www.r-graph-gallery.com/histogram
+
+```{r, echo = F}
+ggplot(data = penguins) +
+  geom_histogram(aes(x = flipper_length_mm,
+                     fill = species),
+                 alpha = 0.5,
+                 position = "identity")+
+  labs(x = "Flipper length (mm)",
+       y = "Frequency",
+       title = "Penguin flipper lengths")+
+  theme_minimal()
+```
+
+
+```{r geom_histogram, exercise=TRUE, exercise.lines = 10}
+
+```
+```{r geom_histogram-solution}
+ggplot(data = penguins) +
+  geom_histogram(aes(x = flipper_length_mm,
+                     fill = species),
+                 alpha = 0.5,
+                 position = "identity")+
+  
+  labs(x = "Flipper length (mm)",
+       y = "Frequency",
+       title = "Penguin flipper lengths")+
+  theme_minimal()
+```
+
+### box plot
+
+https://www.r-graph-gallery.com/boxplot
+
+```{r, echo = F}
+ggplot(data = penguins) +
+  geom_boxplot(aes(x = species, y = flipper_length_mm,color = species), width = 0.3, show.legend = FALSE) +
+  theme_minimal() +
+  labs(x = "Species",
+       y = "Flipper length (mm)") +
+  theme_minimal() +
+  labs(x = "Body mass (g)",
+       y = "Frequency",
+       title = "Penguin body mass")
+```
+
+```{r geom_boxplot, exercise=TRUE, exercise.lines = 10}
+
+```
+
+```{r geom_boxplot-solution}
+ggplot(data = penguins) +
+  geom_boxplot(aes(x = species, y = flipper_length_mm,color = species), width = 0.3, show.legend = FALSE) +
+  theme_minimal() +
+  labs(x = "Species",
+       y = "Flipper length (mm)") +
+  theme_minimal() +
+  labs(x = "Body mass (g)",
+       y = "Frequency",
+       title = "Penguin body mass")
+```
+
+### box plot et jitter plot
+
+https://www.r-graph-gallery.com/89-box-and-scatter-plot-with-ggplot2.html
+
+```{r, echo = F}
+ggplot(data = penguins) +
+  geom_boxplot(aes(x = species, y = body_mass_g, color = species)) +
+  geom_jitter(aes(x = species, y = body_mass_g, color = species), alpha = 0.5, show.legend = FALSE, position = position_jitter(width = 0.2, seed = 0)) +
+  theme_minimal() +
+  labs(x = "Body mass (g)",
+       y = "Frequency",
+       title = "Penguin body mass")
+```
+
+```{r geom_jitter, exercise=TRUE, exercise.lines = 10}
+
+```
+
+```{r geom_jitter-solution}
+ggplot(data = penguins) +
+  geom_boxplot(aes(x = species, y = body_mass_g, color = species)) +
+  geom_jitter(aes(x = species, y = body_mass_g, color = species), alpha = 0.5, show.legend = FALSE, position = position_jitter(width = 0.2, seed = 0)) +
+  theme_dark() +
+  labs(x = "Body mass (g)",
+       y = "Frequency",
+       title = "Penguin body mass")
+```
+
+## Enchainer plusieurs layer
+
+Quittons nos penguins pour retrouver notre dur quotidien dans un monde sous covid-19 pour voir comment `{ggplot}` permet d'enchainer plusieurs layers.
+
+Prenons ici le graphique de l'évolution du nombre de morts en France : 
+
+```{r geom_line_1}
+stringency_index %>% 
+  filter(CountryName == "France") %>% 
+  ggplot()+
+  geom_line(aes(x = Date,y=ConfirmedDeaths),color = 'dark red')
+```
+
+Pour rajouter à ce graphique celle du nombre de cas confirmés, je peux rajouter un nouveau `geom_line()` :
+
+```{r, geom_line_2, include = FALSE}
+stringency_index %>% 
+  filter(CountryName == "France") %>% 
+  ggplot()+
+  geom_line(aes(x = Date,y=ConfirmedDeaths),color = 'dark red')+
+  geom_line(aes(x = Date,y=ConfirmedCases),color = 'red')
+```
+
+```{r flair-geom_line_2, echo = FALSE}
+decorate("geom_line_2") %>% 
+  flair("+
+  geom_line(aes(x = Date,y=ConfirmedCases),color = 'red')")
+```
+
+## A vous de jouer !
+
+Reproduire le graphique précédent pour la Grande Bretagne
+
+```{r geom_line_it, exercise=TRUE, exercise.lines = 10}
+
+```
+
+```{r geom_line_it-solution}
+stringency_index %>% 
+  filter(CountryName == "Italy") %>% 
+  ggplot()+
+  geom_line(aes(x = Date,y=ConfirmedDeaths),color = 'dark red')+
+  geom_line(aes(x = Date,y=ConfirmedCases),color = 'red')
+```
+
+Reproduire le graphique précédent pour 4 pays différents : Allemagne, Espagne, France, Italie, avec la couleur pour identifier les pays et la forme du trait pour différencier les deux indicateurs.
+
+```{r geom_line_4pays, exercise=TRUE, exercise.lines = 10}
+
+```
+
+```{r geom_line_4pays-solution}
+stringency_index %>% 
+  filter(CountryName %in% c("Germany","France", "Italy","Spain")) %>% 
+  ggplot()+
+  geom_line(aes(x = Date,y=ConfirmedDeaths,color = CountryName),linetype=2)+
+  geom_line(aes(x = Date,y=ConfirmedCases,color = CountryName),linetype=1)
+```
+
+## Les graphiques à facette
+
+Les graphiques à facette ou "small multiple" permettent de mettre en lumière la façon dont un phénomène va différer suivant les valeurs d'une variable catégorielle.
+
+La fonction `facet_wrap` de `{ggplot2}` permet de réaliser des facettes en R.
+
+Prenons l'exemple précédent, nous allons pouvoir réaliser un graphique à facettes sur l'ensemble des pays de notre jeux de donnée de cette façon
+
+```{r facet, fig.width = 9, fig.height=8, include = FALSE}
+stringency_index %>% 
+  ggplot()+
+  geom_line(aes(x = Date,y=ConfirmedDeaths,color = CountryName),linetype=2) +
+  geom_line(aes(x = Date,y=ConfirmedCases,color = CountryName),linetype=1) +
+  facet_wrap(~CountryName) +
+  theme(legend.position = 'none')
+```
+
+```{r facet-flair, echo = FALSE}
+decorate("facet") %>% 
+  flair("facet_wrap(~CountryName) +")
+```
+
