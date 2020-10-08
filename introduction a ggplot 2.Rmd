@@ -72,7 +72,7 @@ Les pingouins de l'archipel de Palmer. Artwork by [@allison_horst](https://www.g
 
 Ces données ont été collectées entre 2007 et 2009 par Docteur Dr. Kristen Gorman avec le [programme de recherche écologique à long terme de la station Palmer](https://pal.lternet.edu/), une partie du [réseau de recherche écologique à long terme des Etats Unis](https://lternet.edu/). 
 
-ELles ont été mises dans un package R [palmerpenguins](https://allisonhorst.github.io/palmerpenguins/) par Allison Horst et Alison Hill.
+Elles ont été mises dans un package R [palmerpenguins](https://allisonhorst.github.io/palmerpenguins/) par Allison Horst et Alison Hill.
 Le dataset `palmerpenguins::penguins` contient 8 variables sur 344 pingouins (dont 333 observations complètes). Pour obtenir plus d'info sur les variables, vous pouvez taper `?penguins`.
 
 ```{r}
@@ -440,33 +440,6 @@ ggplot(data = penguins) +
        title = "Penguin body mass")
 ```
 
-### box plot et jitter plot
-
-https://www.r-graph-gallery.com/89-box-and-scatter-plot-with-ggplot2.html
-
-```{r, echo = F}
-ggplot(data = penguins) +
-  geom_boxplot(aes(x = species, y = body_mass_g, color = species)) +
-  geom_jitter(aes(x = species, y = body_mass_g, color = species), alpha = 0.5, show.legend = FALSE, position = position_jitter(width = 0.2, seed = 0)) +
-  theme_minimal() +
-  labs(x = "Body mass (g)",
-       y = "Frequency",
-       title = "Penguin body mass")
-```
-
-```{r geom_jitter, exercise=TRUE, exercise.lines = 10}
-
-```
-
-```{r geom_jitter-solution}
-ggplot(data = penguins) +
-  geom_boxplot(aes(x = species, y = body_mass_g, color = species)) +
-  geom_jitter(aes(x = species, y = body_mass_g, color = species), alpha = 0.5, show.legend = FALSE, position = position_jitter(width = 0.2, seed = 0)) +
-  theme_dark() +
-  labs(x = "Body mass (g)",
-       y = "Frequency",
-       title = "Penguin body mass")
-```
 
 ## Enchainer plusieurs layer
 
@@ -551,6 +524,8 @@ decorate("facet") %>%
 
 ## Les cartes
 
+### Les fonds de carte en R
+
 `{ggplot2}` permet également de faire des cartes, qui devient un layer comme un autre.
 
 La première chose dont on a besoin pour faire des cartes est un fond de carte ou composante spatiale à rajouter à nos données. Ici en l'ocurence nous avons besoin des polygones traçant le contour de nos pays. Pour gérer la composante spatiale vectorielle d'une donnée, le package de référence dans R est aujourd'hui `{sf}`. Nous avons préparé ici un fond de carte spécifique à nos données covid sur les pays de l'union européenne.
@@ -595,7 +570,22 @@ stringency_index_wgs84<- ue %>%
   inner_join(stringency_index,by=c("iso_a3"="CountryCode"))
 ```
 
-Ici nous sommes sur des données en volume (nombre de morts), on va devoir réaliser des ronds proportionnels.
+### Les carte choroplèthe
+
+On va pouvoir utiliser notre table `stringency_index_wgs84` pour par exemple réaliser une carte choroplèthe, ici sur le nombre de morts pour 10000 habitants.
+
+```{r}
+stringency_index_wgs84 %>% 
+  filter(Date == '2020-03-31') %>% 
+  ggplot() +
+    geom_sf(aes(fill = ConfirmedDeaths*10000/pop_est)) + 
+    labs(title = "Nombre de morts pour 10 000 habitants au 31 mars",
+       fill = NULL)
+```
+
+### Les cartes en ronds proportionnels
+
+Pour visualiser un nombre de mort, qui est une données en volumne, on va devoir réaliser une carte en ronds proportionnels.
 
 On va coupler à notre fond de carte obtenu avec `geom_sf()` la fonction `stat_sf_coordinates()` qui permet de réaliser un centroid : 
 
@@ -628,5 +618,32 @@ decorate("map_ggplot_theme") %>%
   flair("fill='#e5e5e5',color='white'") %>% 
   flair(",color='dark red',fill='red',alpha = .2") %>% 
   flair("  scale_size(range = c(1,30))+")
+```
+
+
+## A vous de jouer
+
+
+Réaliser la carte précédentes sur une facette par date au 1er février, 1er mars, 1er avril et 1er juin.
+
+```{r exo_facet_map, exercise=TRUE}
+dates <- ymd(c("2020-02-01","2020-03-01","2020-04-01","2020-05-01"))
+
+```
+
+
+```{r exo_facet_map-solution}
+dates <- ymd(c("2020-02-01","2020-03-01","2020-04-01","2020-05-01"))
+
+stringency_index_wgs84 %>% 
+  filter(Date %in% dates) %>% 
+  ggplot() +
+    geom_sf(fill='#e5e5e5',color='white') +
+    stat_sf_coordinates(aes(size = ConfirmedDeaths),shape=21,color='white',fill='red',alpha = .2) +
+    scale_size(range = c(1,30)) +
+    theme_void() +
+    theme(legend.position = 'top')+
+    labs(title = "Nombre de morts du covid au 31 mars",size = NULL)+
+    facet_wrap(~Date)
 ```
 
