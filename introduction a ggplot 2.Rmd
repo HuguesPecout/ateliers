@@ -17,7 +17,7 @@ library(dplyr)
 library(lubridate)
 library(sf)
 library(flair)
-stringency_index <- read.csv("https://raw.githubusercontent.com/MaelTheuliere/ggplot_shs/master/introduction%20a%20ggplot%202/data/stringency_index.csv") %>% 
+stringency_index <- read.csv("https://raw.githubusercontent.com/MaelTheuliere/ggplot_shs/master/data/stringency_index.csv") %>% 
   mutate(Date = ymd(Date))
 ```
 
