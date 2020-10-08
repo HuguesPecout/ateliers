@@ -6,6 +6,9 @@ BD_stringency_index <- read.csv("https://raw.githubusercontent.com/OxCGRT/covid-
 # Conversion date
 BD_stringency_index <- transform(BD_stringency_index, Date = as.Date(as.character(BD_stringency_index$Date), "%Y%m%d"))
 
+# Supression lignes pays membres de GBR
+BD_stringency_index <- BD_stringency_index[BD_stringency_index$RegionName == "",]
+
 # Séléction variables
 stringency_index<- BD_stringency_index[ ,c(1,2,5,33:35,6,8,10,12,14,16,18,20,21,23:26,28:31) ]
 
@@ -20,5 +23,6 @@ UE <- c("AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN",
 
 stringency_index <- stringency_index[stringency_index$CountryCode %in% UE,]
 
+
 # Enregistrement du sample
-write.csv(stringency_index, "introduction a ggplot 2/data/stringency_index.csv", row.names = FALSE)
+write.csv(stringency_index, "data/stringency_index.csv", row.names = FALSE)
