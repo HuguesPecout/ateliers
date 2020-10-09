@@ -531,7 +531,8 @@ decorate("facet") %>%
 La première chose dont on a besoin pour faire des cartes est un fond de carte ou composante spatiale à rajouter à nos données. Ici en l'ocurence nous avons besoin des polygones traçant le contour de nos pays. Pour gérer la composante spatiale vectorielle d'une donnée, le package de référence dans R est aujourd'hui `{sf}`. Nous avons préparé ici un fond de carte spécifique à nos données covid sur les pays de l'union européenne.
 
 ```{r}
-load('data/ue.RData')
+ue <- read_sf("https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/GeoJSON/europe.geojson") %>% 
+  select(ISO3,NAME,POP2005)
 ```
 
 ```{r}
@@ -547,7 +548,7 @@ On peut remarquer que ce dataset est un peu spécial
 
 ```{r}
 class(ue)
-head(ue[,c("name","pop_est","geometry")])
+head(ue)
 ```
 
 Et l'utilisation de la fonction  `plot()` permet de visualiser nos données
@@ -567,7 +568,7 @@ Pour visualiser nos données covid,il va falloir apparier nos données spatiales
 
 ```{r}
 stringency_index_wgs84<- ue %>% 
-  inner_join(stringency_index,by=c("iso_a3"="CountryCode"))
+  inner_join(stringency_index,by=c("ISO3"="CountryCode"))
 ```
 
 ### Les carte choroplèthe
@@ -578,7 +579,7 @@ On va pouvoir utiliser notre table `stringency_index_wgs84` pour par exemple ré
 stringency_index_wgs84 %>% 
   filter(Date == '2020-03-31') %>% 
   ggplot() +
-    geom_sf(aes(fill = ConfirmedDeaths*10000/pop_est)) + 
+    geom_sf(aes(fill = ConfirmedDeaths*10000/POP2005)) + 
     labs(title = "Nombre de morts pour 10 000 habitants au 31 mars",
        fill = NULL)
 ```

@@ -16,12 +16,15 @@ stringency_index<- BD_stringency_index[ ,c(1,2,5,33:35,6,8,10,12,14,16,18,20,21,
 stringency_index <- stringency_index[stringency_index$Date >= "2020-02-01" & stringency_index$Date <= "2020-06-30",]
 
 # Séléction géographique
-# Import code ISO3 des pays de l'UE
+# Import code ISO3 des pays européenne
+
+eu <- read_sf("https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/GeoJSON/europe.geojson")
+
 UE <- c("AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN", 
         "FRA", "DEU", "GRC", "HUN", "IRL", "ITA", "LVA", "LTU", "LUX", 
         "MLT", "NLD", "POL", "PRT", "ROU", "SVK", "SVN", "ESP", "SWE","GBR")
 
-stringency_index <- stringency_index[stringency_index$CountryCode %in% UE,]
+stringency_index <- stringency_index[stringency_index$CountryCode %in% eu$ISO3,]
 
 
 # Enregistrement du sample
