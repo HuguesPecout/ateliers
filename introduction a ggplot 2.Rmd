@@ -21,6 +21,21 @@ stringency_index <- read.csv("https://raw.githubusercontent.com/MaelTheuliere/gg
   mutate(Date = ymd(Date))
 ```
 
+## Introduction 
+
+Bienvenue sur cet atelier de découverte de ggplot2.
+
+Vous allez dans les 2h qui viennent : 
+
+- comprendre la logique de [The Grammar of Graphics (Statistics and Computing)](https://www.springer.com/fr/book/9780387245447)
+- comprendre à faire des premiers graphiques en ggplot2
+- découvrir les différentes valorisations possibles avec ggplot2
+- faire des cartes avec ggplot2
+- travailler sur des pingouins et du COVID 19 ;-)
+
+![](https://ggplot2.tidyverse.org/logo.png)
+
+
 ## Configuration
 
 Merci d'installer les packages suivants pour suivre ce tutoriel
@@ -51,7 +66,7 @@ library(sf)
 
 ## Présentation de ggplot2
 
-- [ggplot2](http://ggplot2.tidyverse.org/) est un package créé par Hadley Wickham et Winston Chang pour implémenter dans R la vision développée par Leland Wilkinson dans  [The Grammar of Graphics (Statistics and Computing)](https://www.amazon.com/Grammar-Graphics-Statistics-Computing/dp/0387245448/ref=as_li_ss_tl?ie=UTF8&qid=1477928463&sr=8-1&keywords=the+grammar+of+graphics&linkCode=sl1&tag=ggplot2-20&linkId=f0130e557161b83fbe97ba0e9175c431) de la conception de graphiques.
+- [ggplot2](http://ggplot2.tidyverse.org/) est un package créé par Hadley Wickham et Winston Chang pour implémenter dans R la vision développée par Leland Wilkinson dans  [The Grammar of Graphics (Statistics and Computing)](https://www.springer.com/fr/book/9780387245447) de la conception de graphiques.
 
 - Le but est de fournir une approche unique pour produire quasiment **toute valorisation graphique** de données que l'on peut trouver dans des revues scientifiques, les journaux, dans l'analyse statistique ou la data visualisation.
 
