@@ -17,7 +17,7 @@ library(dplyr)
 library(lubridate)
 library(sf)
 library(flair)
-stringency_index <- read.csv("https://raw.githubusercontent.com/MaelTheuliere/ggplot_shs/master/data/stringency_index.csv") %>% 
+stringency_index <- read.csv("https://raw.githubusercontent.com/MaelTheuliere/atelier/master/inst/extdata/stringency_index.csv") %>% 
   mutate(Date = ymd(Date))
 ```
 
@@ -127,11 +127,11 @@ Pour cet atelier, nous travaillerons sur une extraction de ce jeu de données :
 - L'extraction ne comporte que les données sur les pays de l'Union Européenne à 28 (GBR inclus)     
 - Certaines variables ont été supprimées pour simplifier le tableau   
 
-Vous pouvez télécharger l'extraction via ce [lien](https://raw.githubusercontent.com/MaelTheuliere/ggplot_shs/master/introduction a ggplot 2/data/stringency_index.csv), et/ou directement la charger dans R en utilisant son URL d'accès :
+Vous pouvez télécharger l'extraction via ce [lien](https://raw.githubusercontent.com/MaelTheuliere/atelier/master/inst/extdata/stringency_index.csv), et/ou directement la charger dans R en utilisant son URL d'accès :
 
 
 ```{r eval=FALSE}
-stringency_index <- read.csv("https://raw.githubusercontent.com/MaelTheuliere/ggplot_shs/master/introduction%20a%20ggplot%202/data/stringency_index.csv")
+stringency_index <- read.csv("https://raw.githubusercontent.com/MaelTheuliere/atelier/master/inst/extdata/stringency_index.csv")
 ```
 
 Par défaut ici notre variable date n'est pas au bon format, on doit la convertir avec les fonctions du package [`{lubridate}`](https://lubridate.tidyverse.org/) : 
