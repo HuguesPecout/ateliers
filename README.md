@@ -9,5 +9,5 @@ remotes::install_github("MaelTheuliere/ateliers")
 Lancer un tutoriel 
 
 ```
-learnr::run_tutorial('ggplot2',package = "ateliers")
+learnr::run_tutorial('ggplot2',package = "atelier")
 ```
