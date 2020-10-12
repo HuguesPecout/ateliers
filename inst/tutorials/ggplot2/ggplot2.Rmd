@@ -17,7 +17,7 @@ library(dplyr)
 library(lubridate)
 library(sf)
 library(flair)
-stringency_index <- read.csv("https://raw.githubusercontent.com/MaelTheuliere/atelier/master/inst/extdata/stringency_index.csv") %>% 
+stringency_index <- read.csv("https://raw.githubusercontent.com/MaelTheuliere/ateliers/master/inst/extdata/stringency_index.csv") %>% 
   mutate(Date = ymd(Date))
 ```
 
@@ -124,14 +124,14 @@ Chaque indicateur est calculé quotidiennement depuis le 1er janvier 2020, pour 
 
 Pour cet atelier, nous travaillerons sur une extraction de ce jeu de données :    
 - La période de temps a été réduite du 1er février au 30 juin 2020    
-- L'extraction ne comporte que les données sur les pays de l'Union Européenne à 28 (GBR inclus)     
+- L'extraction ne comporte que les données sur 43 pays de l'Union Européenne et de son voisinage   
 - Certaines variables ont été supprimées pour simplifier le tableau   
 
-Vous pouvez télécharger l'extraction via ce [lien](https://raw.githubusercontent.com/MaelTheuliere/atelier/master/inst/extdata/stringency_index.csv), et/ou directement la charger dans R en utilisant son URL d'accès :
+Vous pouvez télécharger l'extraction via ce [lien](https://raw.githubusercontent.com/MaelTheuliere/ateliers/master/inst/extdata/stringency_index.csv), et/ou directement la charger dans R en utilisant son URL d'accès :
 
 
 ```{r eval=FALSE}
-stringency_index <- read.csv("https://raw.githubusercontent.com/MaelTheuliere/atelier/master/inst/extdata/stringency_index.csv")
+stringency_index <- read.csv("https://raw.githubusercontent.com/MaelTheuliere/ateliers/master/inst/extdata/stringency_index.csv")
 ```
 
 Par défaut ici notre variable date n'est pas au bon format, on doit la convertir avec les fonctions du package [`{lubridate}`](https://lubridate.tidyverse.org/) : 
@@ -198,8 +198,8 @@ L'aesthetic sert à identifier les variables que l'on souhaite représenter.
 Par exemple, si l'on souhaite représenter la longueur de la nageoire en fonction du poids des pingouins :
 
 ```{r, fig.height=3.5}
-ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
-  geom_point()
+ggplot(data = penguins) +
+  geom_point(aes(x = flipper_length_mm, y = body_mass_g))
 ```
 
 De plus, la fonction **aes** admet d'autres arguments qui permettent de modifier l'apparence du graphique selon une 3ème variable du jeu de données. Par exemple : 
@@ -363,33 +363,6 @@ Le site [from data to viz](https://www.data-to-viz.com/) vous permet d'avoir une
 
 A partir des sites précédents, refaire les graphiques suivants.
 
-### Diagramme barre
-
-https://www.r-graph-gallery.com/barplot
-
-```{r, echo = F}
-ggplot(penguins) +
-  geom_bar(aes(x = island, fill = species), alpha = 0.8) + 
-  theme_minimal()
-  labs(x = "Island",
-       y = "Frequency",
-       title = "Penguin location")
-```
-
-
-```{r geom_bar, exercise=TRUE, exercise.lines = 10}
-
-```
-
-```{r geom_bar-solution}
-ggplot(penguins) +
-  geom_bar(aes(x = island, fill = species), alpha = 0.8) + 
-  theme_minimal()
-  labs(x = "Island",
-       y = "Frequency",
-       title = "Penguin location")
-```
-
 ### Histogramme
 
 https://www.r-graph-gallery.com/histogram
@@ -399,10 +372,10 @@ ggplot(data = penguins) +
   geom_histogram(aes(x = flipper_length_mm,
                      fill = species),
                  alpha = 0.5,
-                 position = "identity")+
+                 position = "identity") +
   labs(x = "Flipper length (mm)",
        y = "Frequency",
-       title = "Penguin flipper lengths")+
+       title = "Penguin flipper lengths") +
   theme_minimal()
 ```
 
@@ -410,16 +383,16 @@ ggplot(data = penguins) +
 ```{r geom_histogram, exercise=TRUE, exercise.lines = 10}
 
 ```
+
 ```{r geom_histogram-solution}
 ggplot(data = penguins) +
   geom_histogram(aes(x = flipper_length_mm,
                      fill = species),
                  alpha = 0.5,
-                 position = "identity")+
-  
+                 position = "identity") +
   labs(x = "Flipper length (mm)",
        y = "Frequency",
-       title = "Penguin flipper lengths")+
+       title = "Penguin flipper lengths") +
   theme_minimal()
 ```
 
@@ -434,9 +407,9 @@ ggplot(data = penguins) +
   labs(x = "Species",
        y = "Flipper length (mm)") +
   theme_minimal() +
-  labs(x = "Body mass (g)",
-       y = "Frequency",
-       title = "Penguin body mass")
+  labs(x = "Species",
+       y = "flipper length",
+       title = "Penguin flipper length")
 ```
 
 ```{r geom_boxplot, exercise=TRUE, exercise.lines = 10}
@@ -450,11 +423,38 @@ ggplot(data = penguins) +
   labs(x = "Species",
        y = "Flipper length (mm)") +
   theme_minimal() +
-  labs(x = "Body mass (g)",
-       y = "Frequency",
-       title = "Penguin body mass")
+  labs(x = "Species",
+       y = "flipper length",
+       title = "Penguin flipper length")
 ```
 
+
+### Diagramme barre
+
+https://www.r-graph-gallery.com/barplot
+
+```{r, echo = F}
+ggplot(penguins) +
+  geom_bar(aes(x = island, fill = species), alpha = 0.8) + 
+  theme_minimal() +
+  labs(x = "Island",
+       y = "Frequency",
+       title = "Penguin location")
+```
+
+
+```{r geom_bar, exercise=TRUE, exercise.lines = 10}
+
+```
+
+```{r geom_bar-solution}
+ggplot(penguins) +
+  geom_bar(aes(x = island, fill = species), alpha = 0.8) + 
+  theme_minimal() +
+  labs(x = "Island",
+       y = "Frequency",
+       title = "Penguin location")
+```
 
 ## Enchainer plusieurs layer
 
@@ -466,7 +466,7 @@ Prenons ici le graphique de l'évolution du nombre de morts en France :
 stringency_index %>% 
   filter(CountryName == "France") %>% 
   ggplot()+
-  geom_line(aes(x = Date,y=ConfirmedDeaths),color = 'dark red')
+  geom_line(aes(x = Date, y = ConfirmedDeaths), color = 'dark red')
 ```
 
 Pour rajouter à ce graphique celle du nombre de cas confirmés, je peux rajouter un nouveau `geom_line()` :
@@ -475,14 +475,14 @@ Pour rajouter à ce graphique celle du nombre de cas confirmés, je peux rajoute
 stringency_index %>% 
   filter(CountryName == "France") %>% 
   ggplot()+
-  geom_line(aes(x = Date,y=ConfirmedDeaths),color = 'dark red')+
-  geom_line(aes(x = Date,y=ConfirmedCases),color = 'red')
+  geom_line(aes(x = Date, y = ConfirmedDeaths), color = 'dark red')+
+  geom_line(aes(x = Date, y = ConfirmedCases), color = 'red')
 ```
 
 ```{r flair-geom_line_2, echo = FALSE}
 decorate("geom_line_2") %>% 
   flair("+
-  geom_line(aes(x = Date,y=ConfirmedCases),color = 'red')")
+  geom_line(aes(x = Date, y = ConfirmedCases), color = 'red')")
 ```
 
 ## A vous de jouer !
@@ -497,8 +497,8 @@ Reproduire le graphique précédent pour la Grande Bretagne
 stringency_index %>% 
   filter(CountryName == "Italy") %>% 
   ggplot()+
-  geom_line(aes(x = Date,y=ConfirmedDeaths),color = 'dark red')+
-  geom_line(aes(x = Date,y=ConfirmedCases),color = 'red')
+  geom_line(aes(x = Date, y = ConfirmedDeaths), color = 'dark red')+
+  geom_line(aes(x = Date, y = ConfirmedCases), color = 'red')
 ```
 
 Reproduire le graphique précédent pour 4 pays différents : Allemagne, Espagne, France, Italie, avec la couleur pour identifier les pays et la forme du trait pour différencier les deux indicateurs.
@@ -511,8 +511,8 @@ Reproduire le graphique précédent pour 4 pays différents : Allemagne, Espagne
 stringency_index %>% 
   filter(CountryName %in% c("Germany","France", "Italy","Spain")) %>% 
   ggplot()+
-  geom_line(aes(x = Date,y=ConfirmedDeaths,color = CountryName),linetype=2)+
-  geom_line(aes(x = Date,y=ConfirmedCases,color = CountryName),linetype=1)
+  geom_line(aes(x = Date, y = ConfirmedDeaths, color = CountryName), linetype = 2)+
+  geom_line(aes(x = Date, y = ConfirmedCases, color = CountryName), linetype = 1)
 ```
 
 ## Les graphiques à facette
@@ -526,8 +526,8 @@ Prenons l'exemple précédent, nous allons pouvoir réaliser un graphique à fac
 ```{r facet, fig.width = 9, fig.height=8, include = FALSE}
 stringency_index %>% 
   ggplot()+
-  geom_line(aes(x = Date,y=ConfirmedDeaths,color = CountryName),linetype=2) +
-  geom_line(aes(x = Date,y=ConfirmedCases,color = CountryName),linetype=1) +
+  geom_line(aes(x = Date, y = ConfirmedDeaths, color = CountryName), linetype = 2) +
+  geom_line(aes(x = Date, y = ConfirmedCases, color = CountryName), linetype = 1) +
   facet_wrap(~CountryName) +
   theme(legend.position = 'none')
 ```
@@ -547,10 +547,10 @@ La première chose dont on a besoin pour faire des cartes est un fond de carte o
 
 ```{r}
 ue <- read_sf("https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/GeoJSON/europe.geojson") %>% 
-  select(ISO3,NAME,POP2005)
+  select(ISO3, NAME, POP2005)
 ```
 
-```{r}
+```{r, echo = F}
 kable(ue) %>% 
   kable_material()
 ```
@@ -583,7 +583,7 @@ Pour visualiser nos données covid,il va falloir apparier nos données spatiales
 
 ```{r}
 stringency_index_wgs84<- ue %>% 
-  inner_join(stringency_index,by=c("ISO3"="CountryCode"))
+  inner_join(stringency_index,by = c("ISO3" = "CountryCode"))
 ```
 
 ### Les carte choroplèthe
@@ -607,33 +607,34 @@ On va coupler à notre fond de carte obtenu avec `geom_sf()` la fonction `stat_s
 
 ```{r map_ggplot,fig.width = 8,fig.height =8}
 stringency_index_wgs84 %>% 
-  filter(Date=="2020-03-31") %>% 
+  filter(Date == "2020-03-31") %>% 
   ggplot() +
   geom_sf() +
-  stat_sf_coordinates(aes(size = ConfirmedDeaths),shape=21) +
+  stat_sf_coordinates(aes(size = ConfirmedDeaths), shape = 21) +
   theme_void() +
   labs(title = "Nombre de morts du covid au 31 mars")
 ```
 
-Pour en faire une carte difusable, il faut ensuite un peu de style : 
+Pour en faire une carte diffusable, il faut ensuite un peu de style : 
 
 ```{r map_ggplot_theme, include = FALSE,fig.width = 8,fig.height =8}
-stringency_index_wgs84 %>% 
-  filter(Date=="2020-03-31") %>% 
+stringency_index_wgs84 %>%
+  filter(Date == "2020-03-31") %>%
   ggplot() +
-  geom_sf(fill='#e5e5e5',color='white') +
-  stat_sf_coordinates(aes(size = ConfirmedDeaths),shape=21,color='white',fill='red',alpha = .2) +
-  scale_size(range = c(1,30)) +
+  geom_sf(fill = '#e5e5e5', color = 'white') +
+  stat_sf_coordinates(aes(size = ConfirmedDeaths), shape = 21, color = 'white', fill = 'red', alpha = .2) +
+  scale_size(range = c(1, 30)) +
   theme_void() +
-  theme(legend.position = 'top')+
-  labs(title = "Nombre de morts du covid au 31 mars",size = NULL)
+  theme(legend.position = 'top') +
+  labs(title = "Nombre de morts du covid au 31 mars", size = NULL)
 ```
 
 ```{r map_ggplot_theme-flair, echo = FALSE,fig.width = 8,fig.height =8}
 decorate("map_ggplot_theme") %>% 
-  flair("fill='#e5e5e5',color='white'") %>% 
-  flair(",color='dark red',fill='red',alpha = .2") %>% 
-  flair("  scale_size(range = c(1,30))+")
+  flair("fill = '#e5e5e5', color = 'white'") %>% 
+  flair(" color = 'white', fill = 'red', alpha = .2") %>% 
+  flair("scale_size(range = c(1, 30)) +") %>% 
+  flair("theme(legend.position = 'top') +")
 ```
 
 
